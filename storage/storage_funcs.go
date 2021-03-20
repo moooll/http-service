@@ -15,8 +15,8 @@ type Storage struct {
 var storage Storage
 
 func (db *Storage) Upsert(req []dto.Request) {
-	if db.storage == nil {
-		storage.storage = make(map[string]string)
+	if db.storage == nil || len(db.storage) == 0 {
+		db.storage = make(map[string]string)
 	}
 	for _, v := range req {
 		db.m.Lock()
@@ -58,26 +58,4 @@ func (db *Storage) List() (map[string]string, error) {
 		return nil, errors.New("no elements in a storage")
 	}
 	return db.storage, nil
-}
-
-func (db *Storage) FillStorage() error {
-	db.storage = make(map[string]string)
-	// rand:
-	// k := make([]byte, 20)
-	// v := make([]byte, 45)
-	// for i := 0; i < 150; i++ {
-	// 	_, err := rand.Read(k)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	_, err = rand.Read(v)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	db.storage[string(k)] = string(v)
-	// }
-	//
-	db.storage["lol"] = "kek"
-	// fmt.Println(db.storage)
-	return nil
 }

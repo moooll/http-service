@@ -16,7 +16,7 @@ func main() {
 
 	defer logger.Sync()
 	var db = &storage.Storage{}
-	err = db.FillStorage()
+	// err = db.FillStorage()
 	if err != nil {
 		zap.L().Error(err.Error())
 	}
