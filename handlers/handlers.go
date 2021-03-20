@@ -1,11 +1,14 @@
 package handlers
 
 import (
+	"fmt"
+
 	"github.com/pquerna/ffjson/ffjson"
 	"github.com/valyala/fasthttp"
 	"go.uber.org/zap"
 
 	"http-service/dto"
+	"http-service/storage"
 )
 
 /*Добрый день!
@@ -25,69 +28,73 @@ import (
 
 Результаты можно залить на git или скинуть здесь архивом.*/
 
-// no globals??
-
-func Upsert(ctx *fasthttp.RequestCtx) {
+func Upsert(db *storage.Storage, ctx *fasthttp.RequestCtx) {
 	request := []dto.Request{}
 	err := ffjson.Unmarshal(ctx.Request.Body(), &request)
 	if err != nil {
-		zap.L().Info("error unmarshalling request: " + err.Error())
+		zap.L().Info("error unmarshalling request: ", zap.Error(err))
+		fmt.Println(err.Error())
 		ctx.WriteString("could not unmarshal request")
 	}
+	// w/ params from uri
+	// params := []dto.Request{}
+	// keys := ctx.QueryArgs().PeekMulti("key")
+	// values := ctx.QueryArgs().PeekMulti("value")
+	// for i, v := range keys {
+	// 	params = append(params, dto.Request{string(v), string(values[i])})
+	// }
 	db.Upsert(request)
 	// todo: проверка перед отправкой статус кода тут должна быть??
+	ctx.SetBodyString("updated")
 	ctx.SetStatusCode(200)
 }
 
 // "/delete" receives a collection of "keys" as an argument
-func Delete(ctx *fasthttp.RequestCtx) {
+func Delete(db *storage.Storage, ctx *fasthttp.RequestCtx) {
 	var keys []string
 	err := ffjson.Unmarshal(ctx.Request.Body(), &keys)
 	if err != nil {
-		zap.L().Info("error unmarshalling request" + err.Error())
+		zap.L().Info("error unmarshalling request", zap.Error(err))
 	}
 
 	err = db.Delete(keys)
 	if err != nil {
 		ctx.SetBodyString("could not delete keys")
 	} else {
+		zap.L().Info("deleted")
+		ctx.SetBodyString("deleted")
 		ctx.SetStatusCode(200)
 	}
 }
 
-func Get(ctx *fasthttp.RequestCtx) {
+func Get(db *storage.Storage, ctx *fasthttp.RequestCtx) {
 	var keys []string
 	args := ctx.QueryArgs().PeekMulti("key")
 	for _, v := range args {
 		keys = append(keys, string(v))
 	}
-	// err := ffjson.Unmarshal(ctx.Request.Body(), &keys)
-	// if err != nil {
-	// 	zap.L().Info("error unmarshalling request")
-	// }
-
 	values, err := db.Get(keys)
 	if err != nil {
 		ctx.SetBodyString(err.Error())
 	} else {
 		body, err := ffjson.Marshal(values)
 		if err != nil {
-			zap.L().Info("error marshalling request" + err.Error())
+			zap.L().Info("error marshalling request", zap.Error(err))
 		}
 		ctx.SetBody(body)
 	}
-	// append result to body
 }
 
-func List(ctx *fasthttp.RequestCtx) {
+func List(db *storage.Storage, ctx *fasthttp.RequestCtx) {
 	values, err := db.List()
 	if err != nil {
 		ctx.WriteString("nothing found")
 	} else {
 		body, err := ffjson.Marshal(values)
 		if err != nil {
-			zap.L().Info("error marshalling request" + err.Error())
+			zap.L().Info("error marshalling request", zap.Error(err))
+			ctx.WriteString("error marshalling request")
 		}
-		ctx.SetBody(body)
+		ctx.Write(body)
 	}
 }
