@@ -12,7 +12,7 @@ func main() {
 	logger, err := zap.NewProduction()
 	if err != nil {
 		panic(err)
-	}
+	}	
 
 	defer logger.Sync()
 	var db = &storage.Storage{}

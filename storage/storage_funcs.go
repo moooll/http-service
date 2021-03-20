@@ -2,7 +2,6 @@ package storage
 
 import (
 	"errors"
-	"fmt"
 	"sync"
 
 	"http-service/dto"
@@ -39,7 +38,6 @@ func (db *Storage) Delete(keys []string) error {
 	return nil
 }
 
-// todo: mb change map to dto.struct in return value
 func (db *Storage) Get(keys []string) (map[string]string, error) {
 	values := make(map[string]string)
 	for _, v := range keys {
@@ -55,12 +53,10 @@ func (db *Storage) Get(keys []string) (map[string]string, error) {
 	return values, nil
 }
 
-//todo: mb check db.storage length??
-// todo: mb change map to dto.struct in return value
 func (db *Storage) List() (map[string]string, error) {
-	// if len(db.storage) == 0 {
-	// 	return nil, errors.New("no elements in a storage")
-	// }
+	if len(db.storage) == 0 {
+		return nil, errors.New("no elements in a storage")
+	}
 	return db.storage, nil
 }
 
@@ -82,6 +78,6 @@ func (db *Storage) FillStorage() error {
 	// }
 	//
 	db.storage["lol"] = "kek"
-	fmt.Println(db.storage)
+	// fmt.Println(db.storage)
 	return nil
 }
