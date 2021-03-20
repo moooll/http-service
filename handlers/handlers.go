@@ -23,7 +23,6 @@ func Upsert(db *storage.Storage, ctx *fasthttp.RequestCtx) {
 	}
 }
 
-// "/delete" receives a collection of "keys" as an argument
 func Delete(db *storage.Storage, ctx *fasthttp.RequestCtx) {
 	var keys []string
 	args := ctx.QueryArgs().PeekMulti("key")

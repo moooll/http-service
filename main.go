@@ -17,7 +17,6 @@ func main() {
 	defer logger.Sync()
 	zap.ReplaceGlobals(logger)
 	var db = &storage.Storage{}
-	// err = db.FillStorage()
 	if err != nil {
 		zap.L().Error(err.Error())
 	}
